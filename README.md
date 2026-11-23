@@ -56,6 +56,6 @@ files; user-data deletion needs explicit consent. Linux deb/rpm use native packa
 generic per-user/portable installation needs its own tests. No framework is chosen without
 that evaluation.
 
-Client: [SyntraChat](https://github.com/SyntraChat/SyntraChat-Desktop-Tauri).
+Client: [SyntraChat](https://github.com/SyntraChat/SyntraChat).
 Standards/workflows: [community](https://github.com/SyntraChat/.github).
 See the client's docs/RELEASING.md for coordinated release gates.

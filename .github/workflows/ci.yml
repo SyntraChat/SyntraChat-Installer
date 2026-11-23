@@ -1,0 +1,27 @@
+name: Installer checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  rust:
+    uses: SyntraChat/.github/.github/workflows/reusable-rust-ci.yml@5f9a4ddbdfd3b854d5c1771589b80087908be762
+  audit:
+    uses: SyntraChat/.github/.github/workflows/reusable-security.yml@5f9a4ddbdfd3b854d5c1771589b80087908be762
+  build:
+    needs: [rust, audit]
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: rustup toolchain install stable --profile minimal
+      - run: cargo +stable build --locked --release
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: verification-preview-${{ runner.os }}
+          path: |
+            target/release/syntrachat-installer.exe
+            target/release/syntrachat-installer

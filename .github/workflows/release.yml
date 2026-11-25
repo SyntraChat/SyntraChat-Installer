@@ -162,7 +162,7 @@ jobs:
         run: |
           flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           flatpak install --user --noninteractive flathub org.flatpak.Builder org.gnome.Platform//51 org.gnome.Sdk//51
-          flatpak run org.flatpak.Builder --user --force-clean --repo=flatpak-repo flatpak-build packaging/flatpak.json
+          flatpak run --env=FLATPAK_USER_DIR="$HOME/.local/share/flatpak" org.flatpak.Builder --user --force-clean --repo=flatpak-repo flatpak-build packaging/flatpak.json
           flatpak build-bundle --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo flatpak-repo "release-assets/SyntraChat-$VERSION-linux-x86_64.flatpak" org.syntrachat.desktop
           flatpak install --user --noninteractive "release-assets/SyntraChat-$VERSION-linux-x86_64.flatpak"
           flatpak info --user org.syntrachat.desktop

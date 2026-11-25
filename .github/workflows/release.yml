@@ -33,7 +33,7 @@ jobs:
           PY
       - run: python3 -m unittest discover -s tests -v
       - run: sh -n install.sh && sh -n install-gui.sh
-      - run: shellcheck install.sh install-gui.sh
+      - run: shellcheck install.sh install-gui.sh scripts/build-flatpak.sh
   build:
     needs: prepare
     timeout-minutes: 90
@@ -187,19 +187,12 @@ jobs:
       - name: Install current builder and SDKs system-wide
         run: |
           sudo apt-get update
-          sudo apt-get install -y flatpak
+          sudo apt-get install -y flatpak dbus-x11 dbus-user-session
           sudo flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           sudo flatpak install --system --noninteractive flathub org.flatpak.Builder org.gnome.Platform//51 org.gnome.Sdk//51
           flatpak info --system org.gnome.Sdk//51
       - name: Build and verify Flatpak
-        run: |
-          mkdir -p release-assets
-          flatpak run org.flatpak.Builder --force-clean --repo=flatpak-repo flatpak-build packaging/flatpak.json
-          flatpak build-bundle --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo flatpak-repo "release-assets/SyntraChat-$VERSION-linux-x86_64.flatpak" org.syntrachat.desktop
-          flatpak install --user --noninteractive "release-assets/SyntraChat-$VERSION-linux-x86_64.flatpak"
-          flatpak info --user org.syntrachat.desktop
-          flatpak run --command=sh org.syntrachat.desktop -c 'ldd /app/bin/syntrachat' | tee flatpak-libraries.log
-          ! grep -F 'not found' flatpak-libraries.log
+        run: dbus-run-session -- bash scripts/build-flatpak.sh "$VERSION"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release-flatpak

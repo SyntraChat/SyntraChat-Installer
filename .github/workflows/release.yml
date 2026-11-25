@@ -108,6 +108,10 @@ jobs:
           PY
       - run: npm ci
         working-directory: client
+      - name: Embed distribution license notices
+        run: |
+          cp client/LICENSE client/public/LICENSE.txt
+          cp client/THIRD_PARTY_NOTICES.md client/public/THIRD_PARTY_NOTICES.txt
       - run: npm run typecheck && npm run lint && npm run format:check && npm test
         working-directory: client
       - run: cargo +stable test --locked && cargo +stable clippy --locked --all-targets -- -D warnings
@@ -188,6 +192,7 @@ jobs:
       - name: Assemble and verify complete release
         run: |
           cp install.ps1 install.sh release-assets/
+          cp LICENSE release-assets/INSTALLER-LICENSE.txt
           tar -czf "release-assets/SyntraChat-$VERSION-linux-gui-installer.tar.gz" install.sh install-gui.sh README.md
           python3 - <<'PY'
           import json, os

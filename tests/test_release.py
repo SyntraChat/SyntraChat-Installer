@@ -14,6 +14,36 @@ spec.loader.exec_module(release)
 
 
 class ReleaseTests(unittest.TestCase):
+    @unittest.skipIf(os.name == "nt", "POSIX GUI installer test")
+    def test_gui_install_uses_polkit_instead_of_terminal_sudo(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            tools = root / "tools"
+            tools.mkdir()
+            fixture = root / "fixture"
+            fixture.mkdir()
+            asset = "SyntraChat-0.1.0-linux-x86_64.deb"
+            payload = b"fixture package, never run"
+            (fixture / asset).write_bytes(payload)
+            (fixture / "SHA256SUMS").write_text(hashlib.sha256(payload).hexdigest() + "  " + asset + "\n")
+            commands = {
+                "uname": 'if [ "$1" = -s ]; then echo Linux; else echo x86_64; fi',
+                "curl": 'while [ "$#" -gt 0 ]; do case "$1" in https:*) url=$1;; -o) shift; output=$1;; esac; shift; done\ncp "$FIXTURE/${url##*/}" "$output"',
+                "zenity": 'exit 0',
+                "sudo": 'exit 99',
+                "pkexec": 'printf "%s\\n" "$@" > "$AUTH_LOG"\n"$@"',
+                "apt-get": 'exit 0',
+            }
+            for name, content in commands.items():
+                file = tools / name
+                file.write_text("#!/bin/sh\n" + content + "\n")
+                file.chmod(0o755)
+            log = root / "auth.log"
+            env = dict(os.environ, FIXTURE=str(fixture), AUTH_LOG=str(log), PATH=str(tools) + os.pathsep + os.environ["PATH"])
+            result = subprocess.run(["sh", str(ROOT / "install.sh"), "--gui", "--format", "deb"], env=env, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(log.read_text().splitlines()[:3], [str(tools / "apt-get"), "install", "-y"])
+
     def test_missing_package_prevents_release(self):
         with tempfile.TemporaryDirectory() as directory:
             with self.assertRaises(ValueError):

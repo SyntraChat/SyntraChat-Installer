@@ -89,7 +89,7 @@ jobs:
       - if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libfuse2 rpm libarchive-tools zstd flatpak flatpak-builder xvfb dbus-x11
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libfuse2 rpm libarchive-tools zstd xvfb dbus-x11
       - run: rustup toolchain install stable --profile minimal --component rustfmt --component clippy
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
         with:
@@ -157,12 +157,44 @@ jobs:
           result=$?
           cat launch.log
           test "$result" -eq 124
-      - name: Build Flatpak
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: runner.os == 'Linux'
+        with:
+          name: flatpak-input
+          path: flatpak-input/*
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-${{ matrix.platform }}-${{ matrix.arch }}
+          path: release-assets/*
+          if-no-files-found: error
+          retention-days: 14
+  flatpak:
+    needs: [prepare, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      VERSION: ${{ needs.prepare.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: gh run download "$GITHUB_RUN_ID" --name flatpak-input --dir flatpak-input
+      - name: Install current builder and SDKs system-wide
         run: |
-          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          flatpak install --user --noninteractive flathub org.flatpak.Builder org.gnome.Platform//51 org.gnome.Sdk//51
-          flatpak run --env=FLATPAK_USER_DIR="$HOME/.local/share/flatpak" org.flatpak.Builder --user --force-clean --repo=flatpak-repo flatpak-build packaging/flatpak.json
+          sudo apt-get update
+          sudo apt-get install -y flatpak
+          sudo flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install --system --noninteractive flathub org.flatpak.Builder org.gnome.Platform//51 org.gnome.Sdk//51
+          flatpak info --system org.gnome.Sdk//51
+      - name: Build and verify Flatpak
+        run: |
+          mkdir -p release-assets
+          flatpak run org.flatpak.Builder --force-clean --repo=flatpak-repo flatpak-build packaging/flatpak.json
           flatpak build-bundle --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo flatpak-repo "release-assets/SyntraChat-$VERSION-linux-x86_64.flatpak" org.syntrachat.desktop
           flatpak install --user --noninteractive "release-assets/SyntraChat-$VERSION-linux-x86_64.flatpak"
           flatpak info --user org.syntrachat.desktop
@@ -170,12 +202,12 @@ jobs:
           ! grep -F 'not found' flatpak-libraries.log
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: release-${{ matrix.platform }}-${{ matrix.arch }}
+          name: release-flatpak
           path: release-assets/*
           if-no-files-found: error
           retention-days: 14
   publish:
-    needs: [prepare, build]
+    needs: [prepare, build, flatpak]
     runs-on: ubuntu-24.04
     permissions:
       contents: write

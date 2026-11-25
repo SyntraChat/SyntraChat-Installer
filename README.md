@@ -1,9 +1,64 @@
 # SyntraChat Installer
 
-Independent Rust project, version 0.1.0 foundation preview. **Currently a real signed
-release verifier, not yet an installer/uninstaller.** It does not download, install,
-execute, elevate, modify package databases or delete files. No GUI or stable Setup.exe
-has been produced. Installation/rollback/repair/uninstall remain the next installer gate.
+Release packaging and installation for SyntraChat 0.1.0 preview. The release workflow
+builds the pinned client revision in `release.json` on native Windows, macOS Intel,
+macOS Apple Silicon and Linux runners. Publication waits for every package/check.
+
+| Platform | Packages and GUI | CLI |
+| --- | --- | --- |
+| Windows x86-64 | NSIS Setup with WebView2 setup, portable EXE | PowerShell; silent per-user Setup |
+| macOS 14+ Intel / Apple Silicon | DMG and native graphical PKG | Shell; native `installer` command |
+| Linux x86-64 | DEB, RPM, AppImage, Arch pkg.tar.zst, Flatpak; Zenity GUI launcher | Shell; distro package manager or per-user AppImage |
+
+```powershell
+irm https://raw.githubusercontent.com/SyntraChat/SyntraChat-Installer/v0.1.0/install.ps1 | iex
+```
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/SyntraChat/SyntraChat-Installer/v0.1.0/install.sh | sh
+```
+
+Download and inspect scripts before execution if preferred. Both scripts use a pinned
+version and fail on absent/ambiguous SHA-256 or a mismatched download. They trust GitHub
+HTTPS; adjacent checksums are integrity checks, not independent publisher signatures.
+No script weakens Gatekeeper, SmartScreen, the WebKit sandbox or system permissions.
+macOS builds are ad-hoc signed and **not notarized**; Windows Setup is unsigned.
+
+For a GUI, download the Windows Setup EXE, open the macOS PKG, or unpack the Linux
+`*-linux-gui-installer.tar.gz` and run `sh install-gui.sh` (requires Zenity). Linux GUI
+installation still uses the same checked CLI code and the package manager's sudo prompt.
+macOS `sh install.sh --gui` opens the native package installer.
+
+Linux defaults to DEB with apt, RPM with dnf, Arch with pacman, otherwise AppImage:
+
+```sh
+sh install.sh --format flatpak  # or deb, rpm, arch, appimage
+sh install.sh --dry-run        # print asset URL without downloading/installing
+```
+
+Flatpak requires Flatpak plus its GNOME 49 runtime from Flathub. This release does not
+register a Flathub app or AUR entry. AppImage uses ~/.local/bin/syntrachat and an application
+menu entry; older systems may need FUSE 2. Native Linux binaries target a glibc 2.35+
+baseline (Ubuntu 22.04 / Debian 12 and newer); current Arch is supported by its package.
+Linux ARM, Windows ARM and macOS before 14 are not included in 0.1.0.
+Package-manager installations request sudo. Profiles are preserved; Flatpak uses its own
+sandbox data directory. No migration, automated updates or universal rollback is claimed.
+
+## Release workflow
+
+Commit `release.json` with the exact 40-character client revision, then push `v0.1.0`.
+`.github/workflows/release.yml` builds/checks all targets, validates package metadata and
+the Linux launch, checks Windows silent installation, then publishes a complete preview
+release here. It never overwrites an existing release. Every asset has SHA256SUMS and
+source revisions are recorded in provenance.json. `workflow_dispatch` can retry a failed
+build before publication. No cross-repository write token is required.
+
+## Separate signed-manifest verifier
+
+The Rust executable remains a verification-only CLI/library, shipped as
+`syntrachat-verifier-*`. The actual installation entry points are the scripts and native
+packages above. The verifier requires a trusted build-time key; no fake production key
+or test signer is used for these first preview packages.
 
 ```powershell
 cargo fmt --check
@@ -48,13 +103,10 @@ Private keys stay outside Git. Never trust a checksum/public key fetched alongsi
 compromised release. Network replay/expiry, durable installed-version state and key
 rotation must be added before a downloader/update manager uses this contract.
 
-The intended installer architecture is a shared Rust core plus CLI, then an egui/iced
-GUI chosen after size/accessibility/platform measurements. Stage within an owned directory,
-verify before extraction, reject symlinks/traversal, atomically swap version directories,
-retain rollback receipts, and never replace a running executable. Uninstall only owned
-files; user-data deletion needs explicit consent. Linux deb/rpm use native package managers;
-generic per-user/portable installation needs its own tests. No framework is chosen without
-that evaluation.
+Native Setup/PKG and distro package managers own their install lifecycle. The shell
+AppImage path uses versioned files and switches its symlink after verification. Tests cover
+platform selection, the complete-asset publication gate and tampered downloads. Durable
+anti-replay state, signing-key provisioning and rollback remain future updater work.
 
 Client: [SyntraChat](https://github.com/SyntraChat/SyntraChat).
 Standards/workflows: [community](https://github.com/SyntraChat/.github).

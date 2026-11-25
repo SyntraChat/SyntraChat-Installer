@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=SyntraChat
+Comment=A compact multi-messenger workspace
+Exec=syntrachat
+Icon=org.syntrachat.desktop
+Categories=Network;InstantMessaging;
+Terminal=false
+StartupWMClass=SyntraChat

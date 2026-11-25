@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.syntrachat.desktop</id>
+  <name>SyntraChat</name>
+  <summary>A compact multi-messenger workspace</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <description><p>Keep separate messaging accounts in one compact native window. This preview restricts media, downloads and cross-origin sign-in.</p></description>
+  <launchable type="desktop-id">org.syntrachat.desktop.desktop</launchable>
+  <url type="homepage">https://github.com/SyntraChat/SyntraChat</url>
+  <provides><binary>syntrachat</binary></provides>
+  <content_rating type="oars-1.1"/>
+  <releases><release version="0.1.0" date="2026-11-25"/></releases>
+</component>

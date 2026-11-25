@@ -1,0 +1,30 @@
+{
+  "app-id": "org.syntrachat.desktop",
+  "runtime": "org.gnome.Platform",
+  "runtime-version": "49",
+  "sdk": "org.gnome.Sdk",
+  "command": "syntrachat",
+  "finish-args": [
+    "--share=network",
+    "--share=ipc",
+    "--socket=wayland",
+    "--socket=fallback-x11",
+    "--device=dri"
+  ],
+  "modules": [{
+    "name": "syntrachat",
+    "buildsystem": "simple",
+    "build-commands": [
+      "install -Dm755 syntrachat /app/bin/syntrachat",
+      "install -Dm644 org.syntrachat.desktop.png /app/share/icons/hicolor/128x128/apps/org.syntrachat.desktop.png",
+      "install -Dm644 org.syntrachat.desktop.desktop /app/share/applications/org.syntrachat.desktop.desktop",
+      "install -Dm644 org.syntrachat.desktop.metainfo.xml /app/share/metainfo/org.syntrachat.desktop.metainfo.xml"
+    ],
+    "sources": [
+      {"type": "file", "path": "../flatpak-input/syntrachat"},
+      {"type": "file", "path": "../flatpak-input/org.syntrachat.desktop.png"},
+      {"type": "file", "path": "org.syntrachat.desktop.desktop"},
+      {"type": "file", "path": "org.syntrachat.desktop.metainfo.xml"}
+    ]
+  }]
+}

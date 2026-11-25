@@ -2,3 +2,10 @@ target/
 *.key
 *.pem
 .env*
+__pycache__/
+release-assets/
+flatpak-input/
+flatpak-build/
+flatpak-repo/
+downloads/
+client/

@@ -5,6 +5,12 @@ on:
 permissions:
   contents: read
 jobs:
+  scripts:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: python3 -m unittest discover -s tests -v
+      - run: shellcheck install.sh install-gui.sh
   rust:
     uses: SyntraChat/.github/.github/workflows/reusable-rust-ci.yml@5f9a4ddbdfd3b854d5c1771589b80087908be762
   audit:
@@ -13,12 +19,15 @@ jobs:
     needs: [rust, audit]
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-24.04]
+        os: [windows-latest, ubuntu-24.04, macos-15]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: rustup toolchain install stable --profile minimal
       - run: cargo +stable build --locked --release
+      - if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./tests/install.Tests.ps1
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: verification-preview-${{ runner.os }}

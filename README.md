@@ -26,7 +26,8 @@ macOS builds are ad-hoc signed and **not notarized**; Windows Setup is unsigned.
 
 For a GUI, download the Windows Setup EXE, open the macOS PKG, or unpack the Linux
 `*-linux-gui-installer.tar.gz` and run `sh install-gui.sh` (requires Zenity). Linux GUI
-installation still uses the same checked CLI code and the package manager's sudo prompt.
+installation uses the same checked CLI code and Polkit/pkexec for graphical authentication;
+the CLI uses sudo. AppImage needs no administrator privileges.
 macOS `sh install.sh --gui` opens the native package installer.
 
 Linux defaults to DEB with apt, RPM with dnf, Arch with pacman, otherwise AppImage:

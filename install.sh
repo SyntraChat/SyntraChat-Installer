@@ -54,6 +54,16 @@ if [ "$gui" = true ]; then
     fi
 fi
 command -v curl >/dev/null 2>&1 || { echo 'curl is required.' >&2; exit 1; }
+run_admin() {
+    if [ "$gui" = true ]; then
+        command -v pkexec >/dev/null 2>&1 || { echo 'Install Polkit/pkexec for GUI authentication, or use the CLI installer.' >&2; exit 1; }
+        manager=$1
+        shift
+        pkexec "$(command -v "$manager")" "$@"
+    else
+        sudo "$@"
+    fi
+}
 stage=$(mktemp -d "${TMPDIR:-/tmp}/syntrachat.XXXXXXXX")
 trap 'rm -rf -- "$stage"' EXIT
 trap 'exit 130' INT
@@ -73,9 +83,9 @@ if [ "$platform" = macos ]; then
     fi
 else
     case "$format" in
-        deb) sudo apt-get install -y "$stage/$asset" ;;
-        rpm) sudo dnf install -y "$stage/$asset" ;;
-        arch) sudo pacman -U --noconfirm "$stage/$asset" ;;
+        deb) run_admin apt-get install -y "$stage/$asset" ;;
+        rpm) run_admin dnf install -y "$stage/$asset" ;;
+        arch) run_admin pacman -U --noconfirm "$stage/$asset" ;;
         flatpak) flatpak install --user -y "$stage/$asset" ;;
         appimage)
             install_dir="${XDG_DATA_HOME:-$HOME/.local/share}/syntrachat"

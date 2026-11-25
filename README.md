@@ -36,7 +36,7 @@ sh install.sh --format flatpak  # or deb, rpm, arch, appimage
 sh install.sh --dry-run        # print asset URL without downloading/installing
 ```
 
-Flatpak requires Flatpak plus its GNOME 49 runtime from Flathub. This release does not
+Flatpak requires Flatpak plus its GNOME 51 runtime from Flathub. This release does not
 register a Flathub app or AUR entry. AppImage uses ~/.local/bin/syntrachat and an application
 menu entry; older systems may need FUSE 2. Native Linux binaries target a glibc 2.35+
 baseline (Ubuntu 22.04 / Debian 12 and newer); current Arch is supported by its package.

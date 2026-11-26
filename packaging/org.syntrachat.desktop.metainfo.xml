@@ -10,5 +10,5 @@
   <url type="homepage">https://github.com/SyntraChat/SyntraChat</url>
   <provides><binary>syntrachat</binary></provides>
   <content_rating type="oars-1.1"/>
-  <releases><release version="0.1.0" date="2026-11-25"/></releases>
+  <releases><release version="0.2.0" date="2026-11-26"/></releases>
 </component>

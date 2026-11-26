@@ -1,13 +1,13 @@
-# Run: irm https://raw.githubusercontent.com/SyntraChat/SyntraChat-Installer/v0.1.0/install.ps1 | iex
+# Run: irm https://raw.githubusercontent.com/SyntraChat/SyntraChat-Installer/v0.2.0/install.ps1 | iex
 [CmdletBinding()]
 param(
-    [string]$Version = '0.1.0',
+    [string]$Version = '0.2.0',
     [switch]$Gui,
     [switch]$DryRun,
     [string]$DownloadDirectory
 )
 $ErrorActionPreference = 'Stop'
-if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw 'Use a release version such as 0.1.0.' }
+if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw 'Use a release version such as 0.2.0.' }
 if ($env:OS -ne 'Windows_NT') { throw 'Use install.sh on Linux or macOS.' }
 $architecture = $env:PROCESSOR_ARCHITEW6432
 if (-not $architecture) { $architecture = $env:PROCESSOR_ARCHITECTURE }

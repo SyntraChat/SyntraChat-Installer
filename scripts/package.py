@@ -40,7 +40,7 @@ def collect(client: Path, output: Path, version: str, platform: str, arch: str):
             (root / ".PKGINFO").write_text(
                 f"pkgname = syntrachat\npkgver = {version}-1\npkgdesc = Compact multi-messenger workspace\n"
                 f"url = https://github.com/SyntraChat/SyntraChat\nsize = {size}\narch = {arch}\n"
-                "license = MIT\ndepend = gtk3\ndepend = webkit2gtk-4.1\ndepend = openssl\n",
+                "license = MIT\ndepend = gtk3\ndepend = webkit2gtk-4.1\ndepend = openssl\ndepend = libayatana-appindicator\n",
                 encoding="utf-8",
             )
             subprocess.run([

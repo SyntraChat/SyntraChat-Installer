@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 $testRoot = Join-Path ([IO.Path]::GetTempPath()) ('syntrachat-test-' + [guid]::NewGuid())
 [void][IO.Directory]::CreateDirectory($testRoot)
-$asset = 'SyntraChat-0.1.0-windows-x86_64-setup.exe'
+$asset = 'SyntraChat-0.2.0-windows-x86_64-setup.exe'
 $installerTestFixture = @{ Payload = [Text.Encoding]::UTF8.GetBytes('test-only package; never executed'); Download = $null; Checksums = '' }
 $hash = [Security.Cryptography.SHA256]::Create()
 $digest = ([BitConverter]::ToString($hash.ComputeHash($installerTestFixture.Payload))).Replace('-', '').ToLowerInvariant()

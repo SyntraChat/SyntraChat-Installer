@@ -149,9 +149,13 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           dpkg-deb --info release-assets/*.deb
+          dpkg-deb -f release-assets/*.deb Depends | grep appindicator
           rpm -qip release-assets/*.rpm
+          rpm -qp --requires release-assets/*.rpm | grep appindicator
           bsdtar -xOf release-assets/*.pkg.tar.zst .PKGINFO | grep 'pkgname = syntrachat'
           chmod +x release-assets/*.AppImage
+          release-assets/*.AppImage --appimage-extract > /dev/null
+          find squashfs-root -name '*appindicator*.so*' | grep .
           set +e
           timeout 15s xvfb-run -a dbus-run-session -- client/src-tauri/target/release/syntrachat > launch.log 2>&1
           result=$?
@@ -183,6 +187,8 @@ jobs:
       VERSION: ${{ needs.prepare.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
       - run: gh run download "$GITHUB_RUN_ID" --name flatpak-input --dir flatpak-input
       - name: Install current builder and SDKs system-wide
         run: |
@@ -232,7 +238,7 @@ jobs:
           PY
           python3 scripts/check_release.py
           (cd release-assets && sha256sum --check SHA256SUMS)
-      - name: Publish 0.1.0 preview after all package checks pass
+      - name: Publish preview after all package checks pass
         run: |
           # A failed run never creates a partial public release. Never overwrite an existing release.
           gh release create "v$VERSION" release-assets/* --target "$GITHUB_SHA" --title "SyntraChat $VERSION" --notes-file RELEASE_NOTES.md --prerelease

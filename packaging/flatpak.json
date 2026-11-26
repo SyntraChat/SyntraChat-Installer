@@ -9,9 +9,10 @@
     "--share=ipc",
     "--socket=wayland",
     "--socket=fallback-x11",
-    "--device=dri"
+    "--device=dri",
+    "--talk-name=org.kde.StatusNotifierWatcher"
   ],
-  "modules": [{
+  "modules": ["shared-modules/libayatana-appindicator/libayatana-appindicator-gtk3.json", {
     "name": "syntrachat",
     "buildsystem": "simple",
     "build-commands": [

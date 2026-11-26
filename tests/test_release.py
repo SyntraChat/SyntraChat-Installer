@@ -22,7 +22,7 @@ class ReleaseTests(unittest.TestCase):
             tools.mkdir()
             fixture = root / "fixture"
             fixture.mkdir()
-            asset = "SyntraChat-0.1.0-linux-x86_64.deb"
+            asset = "SyntraChat-0.2.0-linux-x86_64.deb"
             payload = b"fixture package, never run"
             (fixture / asset).write_bytes(payload)
             (fixture / "SHA256SUMS").write_text(hashlib.sha256(payload).hexdigest() + "  " + asset + "\n")
@@ -47,24 +47,24 @@ class ReleaseTests(unittest.TestCase):
     def test_missing_package_prevents_release(self):
         with tempfile.TemporaryDirectory() as directory:
             with self.assertRaises(ValueError):
-                release.checksum_release(Path(directory), "0.1.0")
+                release.checksum_release(Path(directory), "0.2.0")
             self.assertFalse((Path(directory) / "SHA256SUMS").exists())
 
     def test_complete_release_checksums_exact_files(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            for name in release.expected_assets("0.1.0"):
+            for name in release.expected_assets("0.2.0"):
                 (root / name).write_bytes(name.encode())
-            release.checksum_release(root, "0.1.0")
+            release.checksum_release(root, "0.2.0")
             for line in (root / "SHA256SUMS").read_text().splitlines():
                 digest, name = line.split("  ")
                 self.assertEqual(digest, hashlib.sha256((root / name).read_bytes()).hexdigest())
-            (root / "SyntraChat-0.1.0-linux-x86_64.flatpak").write_bytes(b"")
+            (root / "SyntraChat-0.2.0-linux-x86_64.flatpak").write_bytes(b"")
             with self.assertRaises(ValueError):
-                release.checksum_release(root, "0.1.0")
+                release.checksum_release(root, "0.2.0")
 
     def test_version_cannot_inject_paths(self):
-        for version in ["../other", "0.1.0;echo", "v0.1.0", ""]:
+        for version in ["../other", "0.2.0;echo", "v0.2.0", ""]:
             with self.assertRaises(ValueError):
                 release.expected_assets(version)
 
@@ -72,6 +72,8 @@ class ReleaseTests(unittest.TestCase):
         manifest = json.loads((ROOT / "packaging/flatpak.json").read_text())
         self.assertEqual(manifest["app-id"], "org.syntrachat.desktop")
         self.assertFalse(any("filesystem" in arg or "system-bus" in arg for arg in manifest["finish-args"]))
+        self.assertEqual([arg for arg in manifest["finish-args"] if "talk-name" in arg], ["--talk-name=org.kde.StatusNotifierWatcher"])
+        self.assertIn("shared-modules/libayatana-appindicator/libayatana-appindicator-gtk3.json", manifest["modules"])
 
     @unittest.skipIf(os.name == "nt", "POSIX installer exercised on Linux/macOS CI")
     def test_shell_installer_selects_each_native_format_without_installing(self):
@@ -80,7 +82,7 @@ class ReleaseTests(unittest.TestCase):
             result = subprocess.run(["sh", str(ROOT / "install.sh"), "--dry-run", "--format", package], capture_output=True, text=True)
             if os.uname().sysname == "Linux":
                 self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertIn("/v0.1.0/SyntraChat-0.1.0-linux-x86_64.", result.stdout)
+                self.assertIn("/v0.2.0/SyntraChat-0.2.0-linux-x86_64.", result.stdout)
 
     @unittest.skipIf(os.name == "nt", "POSIX platform detection test")
     def test_shell_installer_selects_mac_arch_and_rejects_unknown_cpu(self):
@@ -108,7 +110,7 @@ class ReleaseTests(unittest.TestCase):
                 home.mkdir()
                 fixture = root / "fixture"
                 fixture.mkdir()
-                asset = "SyntraChat-0.1.0-linux-x86_64.AppImage"
+                asset = "SyntraChat-0.2.0-linux-x86_64.AppImage"
                 payload = b"#!/bin/sh\necho fixture-only\n"
                 (fixture / asset).write_bytes(payload + (b"tampered" if tampered else b""))
                 (fixture / "SHA256SUMS").write_text(hashlib.sha256(payload).hexdigest() + "  " + asset + "\n")

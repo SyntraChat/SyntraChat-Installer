@@ -1,6 +1,6 @@
 # SyntraChat Installer
 
-Release packaging and installation for SyntraChat 0.1.0 preview. The release workflow
+Release packaging and installation for SyntraChat 0.2.0 preview. The release workflow
 builds the pinned client revision in `release.json` on native Windows, macOS Intel,
 macOS Apple Silicon and Linux runners. Publication waits for every package/check.
 
@@ -11,11 +11,11 @@ macOS Apple Silicon and Linux runners. Publication waits for every package/check
 | Linux x86-64 | DEB, RPM, AppImage, Arch pkg.tar.zst, Flatpak; Zenity GUI launcher | Shell; distro package manager or per-user AppImage |
 
 ```powershell
-irm https://raw.githubusercontent.com/SyntraChat/SyntraChat-Installer/v0.1.0/install.ps1 | iex
+irm https://raw.githubusercontent.com/SyntraChat/SyntraChat-Installer/v0.2.0/install.ps1 | iex
 ```
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/SyntraChat/SyntraChat-Installer/v0.1.0/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/SyntraChat/SyntraChat-Installer/v0.2.0/install.sh | sh
 ```
 
 Download and inspect scripts before execution if preferred. Both scripts use a pinned
@@ -41,13 +41,18 @@ Flatpak requires Flatpak plus its GNOME 51 runtime from Flathub. This release do
 register a Flathub app or AUR entry. AppImage uses ~/.local/bin/syntrachat and an application
 menu entry; older systems may need FUSE 2. Native Linux binaries target a glibc 2.35+
 baseline (Ubuntu 22.04 / Debian 12 and newer); current Arch is supported by its package.
-Linux ARM, Windows ARM and macOS before 14 are not included in 0.1.0.
+Linux ARM, Windows ARM and macOS before 14 are not included in 0.2.0.
 Package-manager installations request sudo. Profiles are preserved; Flatpak uses its own
 sandbox data directory. No migration, automated updates or universal rollback is claimed.
 
+0.2.0 includes the tray library through the pinned Flathub shared-modules dependency.
+The Flatpak grants only the StatusNotifierWatcher bus name for tray integration, with
+no host filesystem or system-bus access. Desktop tray support and global shortcuts vary
+by session; startup integration inside Flatpak is not certified.
+
 ## Release workflow
 
-Commit `release.json` with the exact 40-character client revision, then push `v0.1.0`.
+Commit `release.json` with the exact 40-character client revision, then push `v0.2.0`.
 `.github/workflows/release.yml` builds/checks all targets, validates package metadata and
 the Linux launch, checks Windows silent installation, then publishes a complete preview
 release here. It never overwrites an existing release. Every asset has SHA256SUMS and
@@ -79,10 +84,10 @@ Schema 1 (all fields required; unknown fields rejected):
 {
   "schema": 1,
   "application": "org.syntrachat.desktop",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "channel": "stable",
   "target": "x86_64-pc-windows-msvc",
-  "artifact": "SyntraChat-0.1.0-x86_64-pc-windows-msvc.exe",
+  "artifact": "SyntraChat-0.2.0-x86_64-pc-windows-msvc.exe",
   "sha256": "<64 hexadecimal characters computed from the actual artifact>",
   "size": 123456
 }
@@ -95,7 +100,7 @@ public key as hex **at build time**:
 ```powershell
 $env:SYNTRACHAT_RELEASE_PUBLIC_KEY_HEX = '<trusted public key, 64 hex characters>'
 cargo build --release --locked
-.\target\release\syntrachat-installer.exe verify manifest.json manifest.sig SyntraChat-0.1.0-x86_64-pc-windows-msvc.exe x86_64-pc-windows-msvc stable 0.0.0
+.\target\release\syntrachat-installer.exe verify manifest.json manifest.sig SyntraChat-0.2.0-x86_64-pc-windows-msvc.exe x86_64-pc-windows-msvc stable 0.0.0
 ```
 
 No production trust key is supplied. A normal build fails closed when asked to verify.

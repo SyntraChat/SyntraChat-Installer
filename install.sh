@@ -1,7 +1,7 @@
 #!/bin/sh
-# curl -fsSL https://raw.githubusercontent.com/SyntraChat/SyntraChat-Installer/v0.1.0/install.sh | sh
+# curl -fsSL https://raw.githubusercontent.com/SyntraChat/SyntraChat-Installer/v0.2.0/install.sh | sh
 set -eu
-version=0.1.0
+version=0.2.0
 gui=false
 dry_run=false
 format=auto
@@ -11,7 +11,7 @@ while [ "$#" -gt 0 ]; do
         --format) [ "$#" -ge 2 ] || { echo 'Missing format' >&2; exit 2; }; format=$2; shift ;;
         --gui) gui=true ;;
         --dry-run) dry_run=true ;;
-        --help) echo 'install.sh [--version 0.1.0] [--format auto|appimage|deb|rpm|arch|flatpak] [--gui] [--dry-run]'; exit 0 ;;
+        --help) echo 'install.sh [--version 0.2.0] [--format auto|appimage|deb|rpm|arch|flatpak] [--gui] [--dry-run]'; exit 0 ;;
         *) echo "Unknown option: $1" >&2; exit 2 ;;
     esac
     shift
